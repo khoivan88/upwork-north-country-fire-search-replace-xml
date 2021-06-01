@@ -4,16 +4,10 @@ import argparse
 import csv
 import logging
 import re
-# import shutil
 import sys
-# from functools import partial
-# from itertools import groupby
-# from multiprocessing import Pool
-# from operator import itemgetter
 from pathlib import Path, PurePath
 from typing import Dict, List, Optional, Union
 
-# from fuzzywuzzy import fuzz, process
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.progress import BarColumn, Progress, SpinnerColumn, TimeElapsedColumn
@@ -86,7 +80,8 @@ def replace_product_id(input_file: PurePath,
 
     # breakpoint()
     # content = kv_method(product_id_directory, content)
-    content = m09_method(product_id_directory, content)
+    # content = m09_method(product_id_directory, content)
+    content = bobahop_method(product_id_directory, content)
 
     output_file.write_text(content)
 
@@ -125,6 +120,22 @@ def m09_method(product_id_directory, original_content):
     )
     return pattern.sub(lambda match: replacements[match.group(0)],
                        original_content)
+
+
+def bobahop_method(product_id_directory, original_content):
+    """Takes about 9 mins to run"""
+    content = original_content
+    for old_id, new_id in product_id_directory:
+        # replace "{old_id}" with "!?{old_id}?!"
+        content = content.replace(old_id, f'!?{old_id}?!')
+
+        # replace "http://www.my.url/!?{old_id}?!" with "http://www.my.url/{old_id}"
+        content = content.replace(f'https://www.northcountryfire.com/products/!?{old_id}?!',
+                                  f'https://www.northcountryfire.com/products/{old_id}')
+
+        # replace "!?{old_id}?!" with "{new_id}"
+        content = content.replace(f'!?{old_id}?!', new_id)
+    return content
 
 
 if __name__ == '__main__':
