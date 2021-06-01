@@ -82,13 +82,17 @@ def replace_product_id(input_file: PurePath,
                        output_file: PurePath) -> None:
     product_id_directory = load_directory_file(directory_file)
 
-    with open(input_file, 'r') as f_in:
-        content = f_in.read()
+    content = input_file.read_text()
 
     # breakpoint()
+    content = kv_method(product_id_directory, content)
 
-    # for old_id, new_id in product_id_directory.items():
-    # for i, directory_item in enumerate(product_id_directory):
+    output_file.write_text(content)
+
+
+def kv_method(product_id_directory, original_content):
+    """Takes about 100 mins to run"""
+    content = ''
     for i, (old_id, new_id) in enumerate(product_id_directory):
         # content = re.sub(rf'''(?<=product-id=(?:\"|\')){old_id}(?=(?:\"|\'))''', new_id, content)
 
@@ -102,10 +106,8 @@ def replace_product_id(input_file: PurePath,
                               {old_id}
                          ''',
                          new_id,
-                         content, flags=re.VERBOSE)
-
-    with open(output_file, 'w') as f_out:
-        f_out.write(content)
+                         original_content, flags=re.VERBOSE)
+    return content
 
 
 if __name__ == '__main__':
