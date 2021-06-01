@@ -85,7 +85,8 @@ def replace_product_id(input_file: PurePath,
     content = input_file.read_text()
 
     # breakpoint()
-    content = kv_method(product_id_directory, content)
+    # content = kv_method(product_id_directory, content)
+    content = m09_method(product_id_directory, content)
 
     output_file.write_text(content)
 
@@ -108,6 +109,22 @@ def kv_method(product_id_directory, original_content):
                          new_id,
                          original_content, flags=re.VERBOSE)
     return content
+
+
+def m09_method(product_id_directory, original_content):
+    """Takes about 40 mins to run"""
+    replacements = {old_id: new_id for old_id, new_id in product_id_directory}
+    pattern = re.compile(
+        rf"""
+        (?<!https://www\.northcountryfire\.com/products/)
+        (?:
+            {'|'.join(re.escape(old_id) for old_id in replacements)}
+        )
+        """,
+        flags=re.VERBOSE,
+    )
+    return pattern.sub(lambda match: replacements[match.group(0)],
+                       original_content)
 
 
 if __name__ == '__main__':
